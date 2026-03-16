@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background circle (maskable — safe zone is inner 80%) -->
+  <circle cx="256" cy="256" r="256" fill="#6C3AE8"/>
+  <circle cx="256" cy="256" r="240" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="10"/>
+
+  <!-- Globe body -->
+  <circle cx="256" cy="256" r="155" fill="#1A0533" stroke="rgba(255,255,255,0.22)" stroke-width="4"/>
+
+  <!-- Latitude lines -->
+  <ellipse cx="256" cy="256" rx="155" ry="58"  fill="none" stroke="rgba(255,255,255,0.16)" stroke-width="3"/>
+  <ellipse cx="256" cy="256" rx="155" ry="110" fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="2"/>
+  <line x1="101" y1="256" x2="411" y2="256" stroke="rgba(255,255,255,0.16)" stroke-width="3"/>
+  <line x1="256" y1="101" x2="256" y2="411" stroke="rgba(255,255,255,0.16)" stroke-width="3"/>
+
+  <!-- Longitude curves -->
+  <ellipse cx="256" cy="256" rx="68"  ry="155" fill="none" stroke="rgba(255,255,255,0.16)" stroke-width="3"/>
+  <ellipse cx="256" cy="256" rx="120" ry="155" fill="none" stroke="rgba(255,255,255,0.10)" stroke-width="2"/>
+
+  <!-- Continent blobs -->
+  <!-- Americas -->
+  <path d="M182 195 Q168 215 174 248 Q182 282 176 305 Q190 296 198 272 Q210 245 208 212 Z"
+        fill="#9B72F5" opacity="0.85"/>
+  <!-- Europe/Africa -->
+  <path d="M262 172 Q278 188 282 220 Q286 252 278 290 Q270 312 260 304
+           Q246 284 248 248 Q250 210 256 178 Z"
+        fill="#9B72F5" opacity="0.85"/>
+  <!-- Asia -->
+  <path d="M294 188 Q332 194 348 220 Q354 248 338 270 Q318 284 296 270
+           Q278 248 288 212 Z"
+        fill="#9B72F5" opacity="0.85"/>
+  <!-- Australia (small) -->
+  <ellipse cx="330" cy="300" rx="22" ry="16" fill="#9B72F5" opacity="0.75"/>
+
+  <!-- Flag pole + flag -->
+  <line x1="316" y1="138" x2="316" y2="76" stroke="#FFD700" stroke-width="7" stroke-linecap="round"/>
+  <!-- Flag: 3 horizontal stripes -->
+  <rect x="316" y="76"  width="58" height="38" rx="4" fill="#FF6B35"/>
+  <rect x="316" y="76"  width="58" height="13" rx="2" fill="#FF6B35"/>
+  <rect x="316" y="89"  width="58" height="12" fill="#ffffff"/>
+  <rect x="316" y="101" width="58" height="13" rx="2" fill="#FF6B35"/>
+
+  <!-- Decorative stars -->
+  <circle cx="128" cy="108" r="7"  fill="#FFD700" opacity="0.95"/>
+  <circle cx="394" cy="102" r="5"  fill="#FFD700" opacity="0.85"/>
+  <circle cx="136" cy="396" r="5"  fill="#FFD700" opacity="0.75"/>
+  <circle cx="398" cy="390" r="7"  fill="#FFD700" opacity="0.95"/>
+  <circle cx=" 80" cy="265" r="4"  fill="#ffffff"  opacity="0.4"/>
+  <circle cx="432" cy="255" r="4"  fill="#ffffff"  opacity="0.4"/>
+
+  <!-- Small sparkle lines around stars -->
+  <line x1="128" y1="96"  x2="128" y2="90"  stroke="#FFD700" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="128" y1="120" x2="128" y2="126" stroke="#FFD700" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="116" y1="108" x2="110" y2="108" stroke="#FFD700" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="140" y1="108" x2="146" y2="108" stroke="#FFD700" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

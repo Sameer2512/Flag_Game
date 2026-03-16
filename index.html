@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Flag Quest - Learn World Flags!</title>
+
+  <!-- PWA: theme colour shown in browser chrome and on Android -->
+  <meta name="theme-color" content="#6C3AE8" />
+
+  <!-- PWA: app manifest (install prompt, home-screen icon, splash screen) -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- iOS Safari home-screen icon (Safari ignores manifest icons) -->
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.svg" />
+
+  <!-- iOS: run in full-screen when launched from home screen -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Flag Quest" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles/style.css" />
+</head>
+<body>
+
+  <!-- Confetti Canvas (always on top) -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Loading Overlay -->
+  <div id="loading-overlay">
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <p>Loading flags...</p>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div id="error-message" class="hidden"></div>
+
+  <!-- ===================== MENU SCREEN ===================== -->
+  <div id="menu-screen" class="screen">
+    <div class="menu-container">
+      <div class="title-area">
+        <div class="globe-icon">🌍</div>
+        <h1 class="game-title">Flag Quest</h1>
+        <p class="game-subtitle">Explore flags from around the world!</p>
+      </div>
+
+      <div class="name-input-area">
+        <label for="player-name">Your Name</label>
+        <input
+          type="text"
+          id="player-name"
+          placeholder="Enter your name..."
+          maxlength="20"
+          autocomplete="off"
+        />
+      </div>
+
+      <p class="choose-label">Choose a Region to Play</p>
+
+      <div class="continent-grid">
+        <button class="continent-btn" data-continent="Africa">
+          <span class="continent-emoji">🌍</span>
+          <span class="continent-name">Africa</span>
+          <span class="continent-count" data-continent-count="Africa"></span>
+        </button>
+        <button class="continent-btn" data-continent="Asia">
+          <span class="continent-emoji">🌏</span>
+          <span class="continent-name">Asia</span>
+          <span class="continent-count" data-continent-count="Asia"></span>
+        </button>
+        <button class="continent-btn" data-continent="Europe">
+          <span class="continent-emoji">🏰</span>
+          <span class="continent-name">Europe</span>
+          <span class="continent-count" data-continent-count="Europe"></span>
+        </button>
+        <button class="continent-btn" data-continent="North America">
+          <span class="continent-emoji">🌎</span>
+          <span class="continent-name">North America</span>
+          <span class="continent-count" data-continent-count="North America"></span>
+        </button>
+        <button class="continent-btn" data-continent="South America">
+          <span class="continent-emoji">🦜</span>
+          <span class="continent-name">South America</span>
+          <span class="continent-count" data-continent-count="South America"></span>
+        </button>
+        <button class="continent-btn" data-continent="Oceania">
+          <span class="continent-emoji">🏄</span>
+          <span class="continent-name">Oceania</span>
+          <span class="continent-count" data-continent-count="Oceania"></span>
+        </button>
+        <button class="continent-btn mixed-btn" data-continent="Mixed">
+          <span class="continent-emoji">🌐</span>
+          <span class="continent-name">Mixed</span>
+          <span class="continent-sub">All Countries</span>
+        </button>
+      </div>
+
+      <div class="menu-footer">
+        <span id="menu-high-score">Best Score: 0</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== GAME SCREEN ===================== -->
+  <div id="game-screen" class="screen">
+    <!-- Header bar -->
+    <div class="game-header">
+      <div class="header-player" id="player-display">👤 Player</div>
+      <div class="header-score" id="score-display">⭐ 0</div>
+      <div class="header-timer">
+        <div class="timer-track">
+          <div id="timer-bar"></div>
+        </div>
+        <span id="timer-text">60</span>
+      </div>
+    </div>
+
+    <!-- Main game area -->
+    <div class="game-content">
+
+      <!-- Flag display card -->
+      <div class="flag-card">
+        <div class="flag-wrapper">
+          <img id="flag-image" src="" alt="Guess this flag!" />
+          <div id="country-reveal" class="country-reveal"></div>
+        </div>
+      </div>
+
+      <!-- Answer choices -->
+      <div class="choices-grid" id="choices-grid">
+        <button class="choice-btn" data-index="0"></button>
+        <button class="choice-btn" data-index="1"></button>
+        <button class="choice-btn" data-index="2"></button>
+        <button class="choice-btn" data-index="3"></button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===================== GAME OVER SCREEN ===================== -->
+  <div id="gameover-screen" class="screen">
+    <div class="gameover-container">
+
+      <div class="gameover-trophy">🏆</div>
+      <h2 class="gameover-title">Time's Up!</h2>
+
+      <div id="new-highscore-banner" class="new-highscore hidden">
+        🎉 New High Score! 🎉
+      </div>
+
+      <div class="gameover-card">
+        <p class="gameover-player-name" id="final-player-name">Player</p>
+
+        <div class="gameover-stats">
+          <div class="stat-box">
+            <span class="stat-label">Your Score</span>
+            <span class="stat-value" id="final-score">0</span>
+          </div>
+          <div class="stat-box highlight">
+            <span class="stat-label">Best Score</span>
+            <span class="stat-value" id="final-high-score">0</span>
+          </div>
+          <div class="stat-box">
+            <span class="stat-label">Correct</span>
+            <span class="stat-value" id="final-correct">0/0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="gameover-buttons">
+        <button id="play-again-btn" class="btn-primary">
+          🔄 Play Again
+        </button>
+        <button id="menu-btn" class="btn-secondary">
+          🏠 Main Menu
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Scripts (order matters) -->
+
+  <!--
+    Offline fallback data — loaded BEFORE csvLoader.js so that
+    window.COUNTRIES_LOCAL is available when the CSV fetch fails.
+    On a real server the CSV is used instead; this file is ignored.
+  -->
+  <script src="data/countries_local.js"></script>
+
+  <script src="scripts/csvLoader.js"></script>
+  <script src="scripts/speech.js"></script>
+  <script src="scripts/game.js"></script>
+  <script src="scripts/app.js"></script>
+
+  <!-- PWA: register the service worker for offline support -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker
+          .register('./service-worker.js')
+          .then(reg => console.info('Flag Quest SW registered, scope:', reg.scope))
+          .catch(err => console.warn('Flag Quest SW registration failed:', err));
+      });
+    }
+  </script>
+
+</body>
+</html>
