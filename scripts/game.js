@@ -135,6 +135,24 @@ const Game = {
   },
 
   /**
+   * Pause the countdown timer (e.g. while TTS reads options).
+   */
+  pauseTimer() {
+    clearInterval(this.state.timerInterval);
+    this.state.timerInterval = null;
+  },
+
+  /**
+   * Resume the countdown timer after a pause.
+   * No-op if the game is not active or timer is already running.
+   */
+  resumeTimer() {
+    if (!this.state.gameActive) return;
+    if (this.state.timerInterval) return;
+    this._startTimer();
+  },
+
+  /**
    * Immediately end the game (e.g. user navigates away).
    */
   abort() {

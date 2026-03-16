@@ -110,6 +110,7 @@
   <div id="game-screen" class="screen">
     <!-- Header bar -->
     <div class="game-header">
+      <button id="pause-btn" class="pause-btn" aria-label="Pause game">⏸</button>
       <div class="header-player" id="player-display">👤 Player</div>
       <div class="header-score" id="score-display">⭐ 0</div>
       <div class="header-timer">
@@ -117,6 +118,18 @@
           <div id="timer-bar"></div>
         </div>
         <span id="timer-text">60</span>
+      </div>
+    </div>
+
+    <!-- Pause overlay -->
+    <div id="pause-overlay" class="pause-overlay hidden">
+      <div class="pause-card">
+        <div class="pause-title">⏸ Paused</div>
+        <div class="pause-buttons">
+          <button id="resume-btn"  class="pause-action-btn pause-resume">▶ Resume</button>
+          <button id="restart-btn" class="pause-action-btn pause-restart">🔄 Restart</button>
+          <button id="exit-btn"    class="pause-action-btn pause-exit">🏠 Main Menu</button>
+        </div>
       </div>
     </div>
 

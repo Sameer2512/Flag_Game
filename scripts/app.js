@@ -39,6 +39,7 @@ const App = {
     this._initConfetti();
     this._wireMenu();
     this._wireGameOver();
+    this._wirePause();
     this._populateContinentCounts();
 
     this._showLoading(false);
@@ -111,6 +112,8 @@ const App = {
     clearTimeout(this._letterTimer);
     clearTimeout(this._nextQTimer);
     Speech.stop();
+    Speech.unlock();   // must be synchronous — still inside the user-gesture call stack
+    this._hidePauseOverlay();
 
     const question = Game.start(playerName, continent, this.countries);
 
@@ -158,24 +161,47 @@ const App = {
     const btns = grid.querySelectorAll('.choice-btn');
 
     btns.forEach((btn, idx) => {
-      btn.textContent     = choices[idx].name;
-      btn.className       = 'choice-btn';
-      btn.disabled        = false;
-      btn.dataset.index   = idx;
-      btn.onclick         = () => this._handleAnswer(idx);
+      btn.textContent   = choices[idx].name;
+      btn.className     = 'choice-btn';
+      btn.disabled      = false;
+      btn.dataset.index = idx;
+      btn.onclick       = () => this._handleAnswer(idx);
     });
+
+    /* -- Pause timer and read options aloud -- */
+    Game.pauseTimer();
+
+    Speech.readOptionsSequence(
+      choices.map(c => c.name),
+      (i) => btns[i].classList.add('reading'),
+      (i) => btns[i].classList.remove('reading'),
+      ()  => Game.resumeTimer()
+    );
   },
 
-  _handleAnswer(selectedIdx) {
+  async _handleAnswer(selectedIdx) {
+    /* Disable all buttons immediately to prevent double-tap */
+    const btns = document.querySelectorAll('.choice-btn');
+    btns.forEach(btn => btn.disabled = true);
+
+    /* Cancel any ongoing auto-read, clear reading highlights */
+    Speech.cancelSequence();
+    btns.forEach(btn => btn.classList.remove('reading'));
+
+    /* Resume timer in case it was still paused during auto-read */
+    Game.resumeTimer();
+
+    /* Tap-to-hear: speak the tapped country name before registering */
+    const tappedName = Game.state.currentQuestion.choices[selectedIdx].name;
+    await Speech.speakPromise(tappedName, 0.85);
+
+    /* Register the answer (may return null if game ended while speaking) */
     const result = Game.answer(selectedIdx);
     if (!result) return;
 
-    /* Disable all buttons */
-    document.querySelectorAll('.choice-btn').forEach(btn => (btn.disabled = true));
-
     /* Highlight correct / wrong */
-    document.querySelectorAll('.choice-btn').forEach((btn, idx) => {
-      if (idx === result.correctIndex)                  btn.classList.add('correct');
+    btns.forEach((btn, idx) => {
+      if (idx === result.correctIndex)                   btn.classList.add('correct');
       else if (idx === selectedIdx && !result.isCorrect) btn.classList.add('wrong');
     });
 
@@ -190,16 +216,27 @@ const App = {
       this._playWrongSound();
     }
 
-    /* Letter-by-letter reveal then speech */
-    const name       = result.correctCountry.name;
-    const revealMs   = name.length * 85;
-
+    /* Letter-by-letter country name reveal */
+    const name     = result.correctCountry.name;
+    const revealMs = name.length * 85;
     this._revealName(name);
 
-    setTimeout(() => Speech.speak(name), revealMs + 250);
+    /* Spoken feedback after the reveal animation */
+    if (result.isCorrect) {
+      const enc = Speech.randomEncouragement();
+      setTimeout(
+        () => Speech.speak(`Correct! That's ${name}. ${enc}`),
+        revealMs + 150
+      );
+    } else {
+      setTimeout(
+        () => Speech.speak(`Not quite! That was ${name}`),
+        revealMs + 150
+      );
+    }
 
-    /* Next question after name + pause */
-    const delay = revealMs + 2400;
+    /* Next question after reveal + speech has time to play */
+    const delay = revealMs + 2800;
     this._nextQTimer = setTimeout(() => {
       if (Game.state.gameActive) {
         this._renderQuestion(Game.generateQuestion());
@@ -231,7 +268,7 @@ const App = {
     const bar = document.getElementById('timer-bar');
     bar.style.width      = '100%';
     bar.style.background = 'linear-gradient(90deg, #2ECC71, #8BC34A)';
-    document.getElementById('timer-text').textContent = '60';
+    document.getElementById('timer-text').textContent = '150';
   },
 
   /* ------------------------------------------------------------------ */
@@ -244,7 +281,7 @@ const App = {
     if (!txt || !bar) return;
 
     txt.textContent = timeLeft;
-    bar.style.width = `${(timeLeft / 60) * 100}%`;
+    bar.style.width = `${(timeLeft / 150) * 100}%`;
 
     if (timeLeft > 30) {
       bar.style.background = 'linear-gradient(90deg, #2ECC71, #8BC34A)';
@@ -286,6 +323,54 @@ const App = {
 
       this._showScreen('gameover');
     }, 400);
+  },
+
+  /* ------------------------------------------------------------------ */
+  /* Pause                                                               */
+  /* ------------------------------------------------------------------ */
+
+  _wirePause() {
+    document.getElementById('pause-btn').addEventListener('click', () => this._pauseGame());
+
+    document.getElementById('resume-btn').addEventListener('click', () => this._resumeGame());
+
+    document.getElementById('restart-btn').addEventListener('click', () => {
+      this._hidePauseOverlay();
+      const s = Game.state;
+      this._startGame(s.playerName, s.continent);
+    });
+
+    document.getElementById('exit-btn').addEventListener('click', () => {
+      this._hidePauseOverlay();
+      Game.abort();
+      clearTimeout(this._letterTimer);
+      clearTimeout(this._nextQTimer);
+      Speech.stop();
+      this._showScreen('menu');
+    });
+  },
+
+  _pauseGame() {
+    if (!Game.state.gameActive) return;
+    Game.pauseTimer();
+    Speech.cancelSequence();
+    Speech.stop();
+    clearTimeout(this._nextQTimer);
+    // Remove any reading highlights so they don't get stuck
+    document.querySelectorAll('.choice-btn').forEach(btn => btn.classList.remove('reading'));
+    document.getElementById('pause-overlay').classList.remove('hidden');
+  },
+
+  _resumeGame() {
+    this._hidePauseOverlay();
+    // Only resume if there's still an unanswered question (not mid-feedback)
+    if (!Game.state.answeredCurrent) {
+      Game.resumeTimer();
+    }
+  },
+
+  _hidePauseOverlay() {
+    document.getElementById('pause-overlay').classList.add('hidden');
   },
 
   _wireGameOver() {
